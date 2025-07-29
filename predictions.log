@@ -1,0 +1,78 @@
+2025-07-29 02:36:57,581 - ERROR - Prediction error: 'SPY'
+2025-07-29 02:38:57,442 - ERROR - Prediction error: Expected SPY, TLT, GLD in data but not found. Raw columns: MultiIndex([( 'Close', 'GLD'),
+            ( 'Close', 'SPY'),
+            ( 'Close', 'TLT'),
+            (  'High', 'GLD'),
+            (  'High', 'SPY'),
+            (  'High', 'TLT'),
+            (   'Low', 'GLD'),
+            (   'Low', 'SPY'),
+            (   'Low', 'TLT'),
+            (  'Open', 'GLD'),
+            (  'Open', 'SPY'),
+            (  'Open', 'TLT'),
+            ('Volume', 'GLD'),
+            ('Volume', 'SPY'),
+            ('Volume', 'TLT')],
+           names=['Price', 'Ticker'])
+2025-07-29 02:40:05,154 - INFO - Prediction: DOWN
+2025-07-29 02:49:35,820 - INFO - Prediction: DOWN
+2025-07-29 02:52:02,558 - ERROR - Prediction error for SPY: Model for SPY not found. Please train it first.
+2025-07-29 02:57:19,098 - INFO - Prediction for SPY: DOWN
+2025-07-29 02:59:51,174 - INFO - Prediction for SPY: DOWN
+2025-07-29 02:59:51,401 - INFO - Prediction for AAPL: UP
+2025-07-29 02:59:51,632 - INFO - Prediction for TSLA: UP
+2025-07-29 02:59:56,883 - INFO - Prediction for SPY: DOWN
+2025-07-29 02:59:57,101 - INFO - Prediction for AAPL: UP
+2025-07-29 02:59:57,334 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:02,577 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:02,789 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:03,002 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:08,276 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:08,503 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:08,784 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:09,333 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:10,866 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:12,371 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:14,061 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:14,062 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:14,317 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:14,514 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:19,812 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:20,104 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:20,329 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:25,624 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:25,856 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:26,078 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:31,433 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:31,697 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:31,904 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:37,257 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:37,540 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:37,759 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:43,063 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:43,305 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:43,528 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:48,817 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:49,097 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:49,298 - INFO - Prediction for TSLA: UP
+2025-07-29 03:00:54,574 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:00:54,825 - INFO - Prediction for AAPL: UP
+2025-07-29 03:00:55,062 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:00,355 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:00,580 - INFO - Prediction for AAPL: UP
+2025-07-29 03:01:00,779 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:06,089 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:06,385 - INFO - Prediction for AAPL: UP
+2025-07-29 03:01:06,592 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:11,898 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:12,105 - INFO - Prediction for AAPL: UP
+2025-07-29 03:01:12,315 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:17,603 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:17,834 - INFO - Prediction for AAPL: UP
+2025-07-29 03:01:18,061 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:23,327 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:23,557 - INFO - Prediction for AAPL: UP
+2025-07-29 03:01:23,784 - INFO - Prediction for TSLA: UP
+2025-07-29 03:01:29,118 - INFO - Prediction for SPY: DOWN
+2025-07-29 03:01:29,353 - INFO - Prediction for AAPL: UP
