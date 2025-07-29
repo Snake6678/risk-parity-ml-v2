@@ -1,99 +1,77 @@
-# Risk-Parity Multi-Factor Portfolio with Machine Learning – Version 2.0
+# SPY 5-Day Forecasting with Random Forests – Version 2.0
 
-This repository presents an updated version of a machine learning-based investment strategy focused on predicting the directional movement of the S&P 500 ETF (SPY). Version 2.0 introduces improved predictive accuracy, a broader feature set, and a more rigorous evaluation framework using recent market data.
+This is Version 2.0 of a machine learning project that predicts the 5-day forward return and direction of the S&P 500 ETF (SPY) using technical and cross-asset indicators. This release adds improved modeling, cleaner design, and more consistent results using Random Forests for both regression and classification.
 
-## Overview of Improvements in Version 2.0
+## Overview
 
-- Incorporates updated data through December 2024
-- Expanded feature set, including both technical indicators and cross-asset correlations
-- Chronological train/test split to ensure out-of-sample integrity
-- Enhanced model tuning using `GridSearchCV` with logistic regression and both L1 and L2 penalties
-- Full classification evaluation with precision, recall, and F1-score metrics
+The model generates:
 
-## Objective
+- A numeric forecast of SPY's 5-day return (e.g., 0.012 = +1.2%)
+- A directional classification of whether SPY will go up or down over the next 5 days
 
-The model aims to predict the **direction (up or down)** of SPY's return over a five-day horizon using a set of engineered financial indicators.
+Price data is downloaded directly from Yahoo Finance and includes SPY, TLT, and GLD to inform technical features and correlations.
 
-## Feature Set
+## What’s New in Version 2.0
 
-The model includes the following features:
+- Switched from pure classification to dual modeling: regression + classification
+- Cleaned and simplified code structure (human-style)
+- Added cross-asset features (rolling correlations with TLT and GLD)
+- Applied consistent train/test split using only out-of-sample 2024 data
+- Removed synthetic or proxy data used in earlier versions
 
-| Feature           | Description                                          |
-|-------------------|------------------------------------------------------|
-| `ret_spy`         | Daily return of SPY                                  |
-| `mom5_spy`        | 5-day momentum                                       |
-| `mom20_spy`       | 20-day momentum                                      |
-| `vol20_spy`       | 20-day rolling volatility                            |
-| `rsi14_spy`       | 14-day Relative Strength Index                       |
-| `sma50_ratio`     | Percentage deviation from 50-day simple moving avg   |
-| `sma100_ratio`    | Percentage deviation from 100-day simple moving avg  |
-| `macd`            | MACD line (EMA12 - EMA26)                            |
-| `macd_hist`       | MACD histogram (MACD - signal line)                  |
-| `bollinger_z`     | Z-score of distance from 20-day mean                 |
-| `corr_tlt_spy`    | 20-day rolling correlation between SPY and TLT       |
-| `corr_gld_spy`    | 20-day rolling correlation between SPY and GLD       |
+## Features Used
 
-## Methodology
+- Momentum (5-day, 20-day)
+- Volatility (20-day)
+- RSI (14-day)
+- SMA ratios (vs. 50-day and 100-day averages)
+- MACD and MACD histogram
+- Bollinger Band z-score
+- Rolling 20-day correlations with TLT and GLD
 
-- **Model**: Logistic Regression
-- **Pipeline**: StandardScaler + Logistic Regression with hyperparameter tuning
-- **Hyperparameters**: Regularization strength (`C`) and penalty (`l1`, `l2`)
-- **Tuning**: Performed using 3-fold cross-validation and F1-score as the optimization metric
-- **Target**: Binary indicator of whether the SPY return over the next 5 trading days is positive
+## Target Variables
 
-### Data Splitting
+- `target_return`: actual 5-day future return (regression)
+- `target_direction`: 1 if the return is positive, 0 if not (classification)
 
-- **Training set**: January 2010 to December 2023
-- **Testing set**: January 2024 onward
-- This approach avoids look-ahead bias by using strictly historical data for training.
+## Model Design
 
-## Evaluation Results (Sample Output)
+- Regression model: `RandomForestRegressor`
+- Classification model: `RandomForestClassifier`
+- StandardScaler is used within the regression pipeline
 
+## Evaluation
+
+- Training window: 2010–2023
+- Test window: 2024 only (true out-of-sample)
+- Example output:
 ```
-Best parameters: {'clf__C': 1, 'clf__penalty': 'l2'}
-Directional accuracy: 62.34%
-F1 score: 65.29%
-              precision    recall  f1-score   support
-
-        Down       0.60      0.63      0.61        54
-          Up       0.65      0.63      0.64        64
-
-    accuracy                           0.62       118
-   macro avg       0.62      0.62      0.62       118
-weighted avg       0.63      0.62      0.62       118
+5-day return prediction RMSE: 0.0142
+Directional accuracy: 62.38%
 ```
 
 ## Installation
 
-Required packages:
-
-- `pandas`
-- `numpy`
-- `yfinance`
-- `scikit-learn`
-
-Install dependencies using:
+Install the required dependencies with:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## File Structure
+Contents of `requirements.txt`:
+
+```
+pandas
+numpy
+yfinance
+scikit-learn
+```
+
+## Project Structure
 
 ```
 .
-├── risk_parity_ml_v2.py       # Main script
-├── README.md                  # Project documentation
-├── requirements.txt           # Python dependencies
-├── .gitignore                 # Git exclusions
-└── LICENSE                    # (Optional) project license
+├── spy_forecast.py           # Main script
+├── README.md                 # Documentation
+├── requirements.txt          # Dependencies
 ```
-
-## Previous Version
-
-For the original implementation, refer to [Version 1.0](https://github.com/Snake6678/Risk-Parity-Multi-Factor-Portfolio-with-Machine-Learning).
-
-## License
-
-This project is licensed under the MIT License.
-
