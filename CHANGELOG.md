@@ -2,35 +2,36 @@
 
 ## [v2.0] – 2025-07-29
 
-### Added
-- Logistic Regression classifier to predict the 5-day forward direction of SPY
-- Feature engineering for SPY using technical indicators:
-  - Momentum (5-day, 20-day)
-  - Volatility (20-day rolling std)
-  - RSI (14-day)
-  - SMA ratios (50-day, 100-day)
-  - MACD and MACD histogram
-  - Bollinger Band z-score
-  - Cross-asset correlations with TLT and GLD
-- Out-of-sample test set covering January–December 2024
-- Hyperparameter tuning with `GridSearchCV` (penalty and regularization strength)
-- Evaluation metrics including directional accuracy, F1 score, and classification report
-
 ### Changed
-- Removed synthetic asset generation (BondProxy and GoldProxy)
-- Replaced regression targets (5-day forward returns) with a binary classification target (up/down)
-- Focused on single-asset (SPY) forecasting rather than portfolio optimization
-- Switched model from `RandomForestRegressor` to `LogisticRegression`
+- Replaced synthetic multi-asset system with a single-asset model focused only on SPY
+- Removed custom class structure (`DataLoader`, `FeatureEngineer`, `ModelTrainer`, `PortfolioOptimizer`)
+- Eliminated synthetic proxies for BondProxy and GoldProxy
+- Replaced portfolio optimization with direct return and direction forecasting
+- Simplified the code into a single, flat, human-readable script (`spy_forecast.py`)
+
+### Added
+- Daily feature engineering using SPY technical indicators:
+  - Momentum, volatility, RSI, SMA ratios, MACD, Bollinger Bands
+  - Cross-asset correlations with TLT and GLD
+- Dual model structure:
+  - RandomForestRegressor for 5-day forward return prediction
+  - RandomForestClassifier for 5-day directional (up/down) classification
+- Chronological train/test split (train through 2023, test on 2024 only)
+- Evaluation metrics: RMSE and directional accuracy
+
+### Removed
+- Risk parity optimization logic
+- Multi-asset regressors
+- Need for local CSV file (uses Yahoo Finance API instead)
 
 ---
 
 ## [v1.0] – 2025-07-29
 
 ### Added
-- End-to-end pipeline for building a multi-asset, risk-parity portfolio using synthetic data
-- `DataLoader`: reads SPY CSV data and creates synthetic proxies for bonds and gold
-- `FeatureEngineer`: calculates returns, momentum, volatility, and RSI for each asset
-- `ModelTrainer`: trains `RandomForestRegressor` models per asset to forecast 5-day forward returns
-- `PortfolioOptimizer`: uses risk parity optimization via `scipy.optimize.minimize`
-- Demonstration script: trains models, predicts returns, and computes portfolio weights
-
+- Modular pipeline for multi-asset prediction and portfolio optimization
+- `DataLoader`: loads SPY CSV and generates synthetic returns for bond/gold proxies
+- `FeatureEngineer`: computes basic indicators (momentum, volatility, RSI)
+- `ModelTrainer`: trains one `RandomForestRegressor` per asset
+- `PortfolioOptimizer`: solves for risk parity weights using `scipy.optimize.minimize`
+- Fully self-contained demonstration using only historical data and no live API calls
