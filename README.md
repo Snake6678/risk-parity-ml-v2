@@ -1,77 +1,93 @@
-# SPY 5-Day Forecasting with Random Forests – Version 2.0
+# HedgeFund AI
 
-This is Version 2.0 of a machine learning project that predicts the 5-day forward return and direction of the S&P 500 ETF (SPY) using technical and cross-asset indicators. This release adds improved modeling, cleaner design, and more consistent results using Random Forests for both regression and classification.
+A machine learning pipeline for predicting short-term equity movements using macroeconomic indicators, ETFs, and technical data. Built for research and potential deployment in quantitative hedge fund environments.
 
-## Overview
+## Project Overview
 
-The model generates:
+This repository contains a modular training pipeline for building and evaluating ML-based models that predict binary price movements (up/down) for major equities. It supports:
 
-- A numeric forecast of SPY's 5-day return (e.g., 0.012 = +1.2%)
-- A directional classification of whether SPY will go up or down over the next 5 days
+- Automated data downloading via `yfinance`
+- Feature engineering from price returns, momentum, volatility, and macro instruments (GLD, TLT)
+- Model training with `XGBoost`, `LogisticRegression`, `RandomForest`, etc.
+- Cross-validation performance reporting
+- Scalable training over multiple tickers
 
-Price data is downloaded directly from Yahoo Finance and includes SPY, TLT, and GLD to inform technical features and correlations.
+## Key Features
 
-## What’s New in Version 2.0
+- Data Sources: Historical adjusted prices from Yahoo Finance for equities and macro ETFs
+- Models: Supports ensemble methods and interpretable classifiers
+- CV Accuracy Reporting: Tracks model performance via cross-validation
+- Modular Design: Easy to plug in new tickers, models, or features
+- Command-line Ready: Train all models with a single command
 
-- Switched from pure classification to dual modeling: regression + classification
-- Cleaned and simplified code structure (human-style)
-- Added cross-asset features (rolling correlations with TLT and GLD)
-- Applied consistent train/test split using only out-of-sample 2024 data
-- Removed synthetic or proxy data used in earlier versions
+## Tech Stack
 
-## Features Used
+| Tool              | Purpose                         |
+|-------------------|----------------------------------|
+| Python            | Core programming language        |
+| yfinance          | Financial data acquisition       |
+| pandas / numpy    | Data manipulation                |
+| scikit-learn      | Model training and evaluation    |
+| xgboost           | Gradient boosting classifier     |
+| joblib            | Model persistence                |
 
-- Momentum (5-day, 20-day)
-- Volatility (20-day)
-- RSI (14-day)
-- SMA ratios (vs. 50-day and 100-day averages)
-- MACD and MACD histogram
-- Bollinger Band z-score
-- Rolling 20-day correlations with TLT and GLD
+## Example Output
 
-## Target Variables
-
-- `target_return`: actual 5-day future return (regression)
-- `target_direction`: 1 if the return is positive, 0 if not (classification)
-
-## Model Design
-
-- Regression model: `RandomForestRegressor`
-- Classification model: `RandomForestClassifier`
-- StandardScaler is used within the regression pipeline
-
-## Evaluation
-
-- Training window: 2010–2023
-- Test window: 2024 only (true out-of-sample)
-- Example output:
 ```
-5-day return prediction RMSE: 0.0142
-Directional accuracy: 62.38%
+Starting upgraded training pipeline: 2025-07-29
+Training model for SPY...
+Trained Logistic model with CV accuracy: 0.5456
+Training model for AAPL...
+Trained Logistic model with CV accuracy: 0.5266
+...
 ```
 
-## Installation
+## Repository Structure
 
-Install the required dependencies with:
+```
+hedgefund_ai/
+├── models/                   # Saved models per ticker
+├── train_models.py          # Main training script
+├── feature_engineering.py   # Custom feature generation logic
+├── utils.py                 # Utility functions
+├── requirements.txt         # Dependencies
+└── README.md                # You're reading it
+```
+
+## How to Run
 
 ```bash
+# Clone the repo
+git clone https://github.com/Snake6678/risk-parity-ml-v2.git
+cd hedgefund_ai
+
+# (Optional) Create a virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run training
+python train_models.py
 ```
 
-Contents of `requirements.txt`:
+## Current Model Status
 
-```
-pandas
-numpy
-yfinance
-scikit-learn
-```
+- Models trained on: SPY, AAPL, MSFT, TSLA, GOOGL, NVDA, AMZN, META, JPM, XOM, V
+- Target variable: 1-day forward binary return (up/down)
+- Average CV accuracy range: 0.51 – 0.56
 
-## Project Structure
+## Roadmap
 
-```
-.
-├── spy_forecast.py           # Main script
-├── README.md                 # Documentation
-├── requirements.txt          # Dependencies
-```
+- [x] Add CV reporting and logging
+- [x] Add fallback model selection
+- [ ] Integrate feature importance analysis
+- [ ] Add backtesting of predictions
+- [ ] Deploy prediction API (FastAPI)
+
+## Author
+
+**Bryan Wierdak**  
+Quantitative Developer | Data Scientist  
+[GitHub Profile](https://github.com/Snake6678)
