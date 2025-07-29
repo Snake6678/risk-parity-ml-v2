@@ -89,5 +89,3 @@ python train_models.py
 ## Author
 
 **Bryan Wierdak**  
-Quantitative Developer | Data Scientist  
-[GitHub Profile](https://github.com/Snake6678)
