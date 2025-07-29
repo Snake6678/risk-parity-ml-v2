@@ -118,9 +118,12 @@ def train_and_evaluate(data):
     plt.tight_layout()
     plt.show()
 
-    joblib.dump(best_model, "rf_model.pkl")
-    joblib.dump(selector, "selector.pkl")
-    joblib.dump(scaler, "scaler.pkl")
+    # Save models in 'models' directory with ticker-specific names for compatibility
+    import os
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(best_model, "models/xgb_SPY.pkl")
+    joblib.dump(selector, "models/selector_SPY.pkl")
+    joblib.dump(scaler, "models/scaler_SPY.pkl")
 
 
 def main():

@@ -48,11 +48,17 @@ def dashboard():
 @app.get("/predict")
 def predict(ticker: str = Query(...)):
     try:
-        model_path = f"models/rf_{ticker.upper()}.pkl"
-        if not os.path.exists(model_path):
-            return {"prediction": "ERROR: Model not found", "ticker": ticker.upper(), "timestamp": datetime.now()}
+        ticker = ticker.upper()
+        model_path = f"models/xgb_{ticker}.pkl"
+        selector_path = f"models/selector_{ticker}.pkl"
+        scaler_path = f"models/scaler_{ticker}.pkl"
+
+        if not (os.path.exists(model_path) and os.path.exists(selector_path) and os.path.exists(scaler_path)):
+            return {"prediction": "ERROR: Model, selector, or scaler not found.", "ticker": ticker, "timestamp": datetime.now()}
 
         model = joblib.load(model_path)
+        selector = joblib.load(selector_path)
+        scaler = joblib.load(scaler_path)
 
         raw = yf.download([ticker, "TLT", "GLD"], period="6mo")
         if "Adj Close" in raw.columns.levels[0]:
@@ -60,21 +66,22 @@ def predict(ticker: str = Query(...)):
         else:
             prices = raw["Close"].dropna()
 
-        data = engineer_features(prices, ticker.upper())
+        data = engineer_features(prices, ticker)
         latest = data.drop(columns=["target"]).iloc[-1:]
 
-        scaler = StandardScaler().fit(data.drop(columns=["target"]))
-        X = scaler.transform(latest)
-        pred = model.predict(X)[0]
-        conf = model.predict_proba(X)[0][1]  # probability of UP class
+        X_scaled = scaler.transform(latest)
+        X_selected = selector.transform(X_scaled)
+
+        pred = model.predict(X_selected)[0]
+        conf = model.predict_proba(X_selected)[0][1]
 
         return {
             "prediction": "UP" if pred == 1 else "DOWN",
             "confidence": round(float(conf), 4),
-            "ticker": ticker.upper(),
+            "ticker": ticker,
             "timestamp": datetime.now()
         }
 
     except Exception as e:
-        return {"prediction": f"ERROR: {str(e)}", "ticker": ticker.upper(), "timestamp": datetime.now()}
+        return {"prediction": f"ERROR: {str(e)}", "ticker": ticker, "timestamp": datetime.now()}
 
