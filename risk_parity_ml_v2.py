@@ -1,128 +1,112 @@
 import yfinance as yf
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.metrics import mean_squared_error, accuracy_score
 
-# ---------------------------------------------------------------
-# 1. Download data (handles multi-index and yfinance adjustments)
-# ---------------------------------------------------------------
-tickers    = ["SPY", "TLT", "GLD"]
+tickers = ["SPY", "TLT", "GLD"]
 start_date = "2010-01-01"
-end_date   = "2024-12-31"
-raw = yf.download(
-    tickers,
-    start=start_date,
-    end=end_date,
-    progress=False,
-    auto_adjust=False
-)
+end_date = "2024-12-31"
 
-# extract Adjusted Close (fallback to Close if necessary)
-if isinstance(raw.columns, pd.MultiIndex):
-    try:
-        prices = raw["Adj Close"]
-    except KeyError:
-        prices = raw["Close"]
+raw_data = yf.download(tickers, start=start_date, end=end_date, progress=False)
+
+if isinstance(raw_data.columns, pd.MultiIndex):
+    prices = raw_data.get("Adj Close", raw_data.get("Close"))
 else:
-    prices = raw["Adj Close"] if "Adj Close" in raw.columns else raw["Close"]
+    prices = raw_data["Adj Close"] if "Adj Close" in raw_data else raw_data["Close"]
 
-# Focus on the SPY series for most indicators
-spy_price  = prices["SPY"]
-spy_ret    = spy_price.pct_change()
+spy_price = prices["SPY"]
+spy_return = spy_price.pct_change()
 
-# ---------------------------------------------------------------
-# 2. Feature engineering: SPY indicators + a few cross‑asset vars
-# ---------------------------------------------------------------
-mom5  = spy_price / spy_price.shift(5) - 1
-mom20 = spy_price / spy_price.shift(20) - 1
-vol20 = spy_ret.rolling(20).std()
+momentum_5 = spy_price.pct_change(5)
+momentum_20 = spy_price.pct_change(20)
+volatility_20 = spy_return.rolling(20).std()
 
 delta = spy_price.diff()
-gain  = delta.clip(lower=0).ewm(alpha=1/14, adjust=False).mean()
-loss  = (-delta.clip(upper=0)).ewm(alpha=1/14, adjust=False).mean()
-rsi14 = 100 - (100/(1 + gain/loss))
+gain = delta.clip(lower=0).ewm(alpha=1/14, adjust=False).mean()
+loss = -delta.clip(upper=0).ewm(alpha=1/14, adjust=False).mean()
+rsi_14 = 100 - (100 / (1 + gain / loss))
 
-sma50  = spy_price.rolling(50).mean()
-sma100 = spy_price.rolling(100).mean()
-sma50_ratio  = spy_price / sma50 - 1
-sma100_ratio = spy_price / sma100 - 1
+sma_50 = spy_price.rolling(50).mean()
+sma_100 = spy_price.rolling(100).mean()
+sma_50_ratio = spy_price / sma_50 - 1
+sma_100_ratio = spy_price / sma_100 - 1
 
-ema12  = spy_price.ewm(span=12, adjust=False).mean()
-ema26  = spy_price.ewm(span=26, adjust=False).mean()
-macd   = ema12 - ema26
-signal = macd.ewm(span=9, adjust=False).mean()
-macd_hist = macd - signal
+ema_12 = spy_price.ewm(span=12, adjust=False).mean()
+ema_26 = spy_price.ewm(span=26, adjust=False).mean()
+macd_line = ema_12 - ema_26
+signal_line = macd_line.ewm(span=9, adjust=False).mean()
+macd_hist = macd_line - signal_line
 
-rolling_mean20 = spy_price.rolling(20).mean()
-rolling_std20  = spy_price.rolling(20).std()
-bollinger_z = (spy_price - rolling_mean20) / (rolling_std20 * 2)
+rolling_mean = spy_price.rolling(20).mean()
+rolling_std = spy_price.rolling(20).std()
+bollinger_z = (spy_price - rolling_mean) / (2 * rolling_std)
 
-corr_tlt = prices["TLT"].pct_change().rolling(20).corr(spy_ret)
-corr_gld = prices["GLD"].pct_change().rolling(20).corr(spy_ret)
+corr_with_tlt = prices["TLT"].pct_change().rolling(20).corr(spy_return)
+corr_with_gld = prices["GLD"].pct_change().rolling(20).corr(spy_return)
 
-feature_df = pd.DataFrame({
-    "ret_spy":        spy_ret,
-    "mom5_spy":       mom5,
-    "mom20_spy":      mom20,
-    "vol20_spy":      vol20,
-    "rsi14_spy":      rsi14,
-    "sma50_ratio":    sma50_ratio,
-    "sma100_ratio":   sma100_ratio,
-    "macd":           macd,
-    "macd_hist":      macd_hist,
-    "bollinger_z":    bollinger_z,
-    "corr_tlt_spy":   corr_tlt,
-    "corr_gld_spy":   corr_gld
+features = pd.DataFrame({
+    "spy_return": spy_return,
+    "momentum_5": momentum_5,
+    "momentum_20": momentum_20,
+    "volatility_20": volatility_20,
+    "rsi_14": rsi_14,
+    "sma_50_ratio": sma_50_ratio,
+    "sma_100_ratio": sma_100_ratio,
+    "macd_line": macd_line,
+    "macd_hist": macd_hist,
+    "bollinger_z": bollinger_z,
+    "corr_with_tlt": corr_with_tlt,
+    "corr_with_gld": corr_with_gld
 })
 
-# ---------------------------------------------------------------
-# 3. Target: direction of SPY’s return over the next 5 trading days
-# ---------------------------------------------------------------
-horizon = 5
-future_ret = spy_price.pct_change(horizon).shift(-horizon)
-target = (future_ret > 0).astype(int)
+forecast_horizon = 5
+future_return = spy_price.pct_change(forecast_horizon).shift(-forecast_horizon)
+future_direction = (future_return > 0).astype(int)
 
-dataset = pd.concat([feature_df, target.rename("target")], axis=1).dropna()
-X = dataset.drop("target", axis=1)
-y = dataset["target"]
+data = pd.concat([
+    features,
+    future_return.rename("target_return"),
+    future_direction.rename("target_direction")
+], axis=1).dropna()
 
-train_end = pd.Timestamp("2023-12-31")
-mask      = dataset.index <= train_end
-X_train, X_test = X.loc[mask], X.loc[~mask]
-y_train, y_test = y.loc[mask], y.loc[~mask]
+X = data[features.columns]
+y_reg = data["target_return"]
+y_cls = data["target_direction"]
 
-# ---------------------------------------------------------------
-# 4. Model: Logistic Regression with hyper‑parameter tuning
-# ---------------------------------------------------------------
-pipeline = Pipeline([
+train_cutoff = pd.Timestamp("2023-12-31")
+train_mask = data.index <= train_cutoff
+
+X_train = X.loc[train_mask]
+X_test = X.loc[~train_mask]
+y_train_reg = y_reg.loc[train_mask]
+y_test_reg = y_reg.loc[~train_mask]
+y_train_cls = y_cls.loc[train_mask]
+y_test_cls = y_cls.loc[~train_mask]
+
+regression_model = Pipeline([
     ("scaler", StandardScaler()),
-    ("clf", LogisticRegression(max_iter=1000, solver="liblinear"))
+    ("model", RandomForestRegressor(
+        n_estimators=300,
+        min_samples_leaf=10,
+        random_state=42
+    ))
 ])
 
-param_grid = {
-    "clf__C":      [0.01, 0.1, 1, 10, 100],
-    "clf__penalty": ["l1", "l2"]
-}
-grid = GridSearchCV(
-    estimator=pipeline,
-    param_grid=param_grid,
-    cv=3,
-    scoring="f1",
-    n_jobs=-1
+regression_model.fit(X_train, y_train_reg)
+reg_predictions = regression_model.predict(X_test)
+rmse = np.sqrt(mean_squared_error(y_test_reg, reg_predictions))
+print(f"5-day return prediction RMSE: {rmse:.4f}")
+
+classification_model = RandomForestClassifier(
+    n_estimators=300,
+    min_samples_leaf=10,
+    random_state=42
 )
-grid.fit(X_train, y_train)
 
-best_model = grid.best_estimator_
-probability = best_model.predict_proba(X_test)[:, 1]
-predicted   = (probability > 0.5).astype(int)
-
-accuracy = accuracy_score(y_test, predicted)
-f1       = f1_score(y_test, predicted)
-print("Best parameters:", grid.best_params_)
+classification_model.fit(X_train, y_train_cls)
+cls_predictions = classification_model.predict(X_test)
+accuracy = accuracy_score(y_test_cls, cls_predictions)
 print(f"Directional accuracy: {accuracy * 100:.2f}%")
-print(f"F1 score: {f1 * 100:.2f}%")
-print(classification_report(y_test, predicted, target_names=["Down", "Up"]))
